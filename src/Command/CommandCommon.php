@@ -23,7 +23,7 @@ trait CommandCommon
      */
     protected function telemetry(array $data = []): void
     {
-        if (getenv('DO_NOT_TRACK') === 'true') {
+        if (getenv('DO_NOT_TRACK') === 'false') {
             return;
         }
         try {
