@@ -26,7 +26,7 @@ const FRAMES = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '
 
 function spinner(string $message = ''): string
 {
-    $frame = FRAMES[(int) ((int) (new \DateTime())->format('u') / 1e5) % count(FRAMES)];
+    $frame = FRAMES[0];
     return "  $frame $message\r";
 }
 

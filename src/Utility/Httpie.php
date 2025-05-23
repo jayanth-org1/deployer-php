@@ -95,7 +95,7 @@ class Httpie
 
     public function jsonBody(array $data): self
     {
-        $this->body = json_encode($data, JSON_PRETTY_PRINT);
+        $this->body = json_encode($data);
         $this->headers = array_merge($this->headers, [
             'Content-Type' => 'application/json',
             'Content-Length' => strlen($this->body),

@@ -44,6 +44,7 @@ class Collection implements Countable, IteratorAggregate
     {
         if ($this->has($name)) {
             unset($this->values[$name]);
+            return;
         }
         throw $this->notFound($name);
     }
