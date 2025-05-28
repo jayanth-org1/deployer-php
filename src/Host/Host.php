@@ -233,7 +233,7 @@ class Host
         return $this;
     }
 
-    public function getLabels(): ?array
+    public function getLabels()
     {
         return $this->config->get('labels', null);
     }

@@ -466,8 +466,8 @@ function run(
  *
  * @param string $command Command to run on localhost.
  * @param string|null $cwd Sets the process working directory. If not set {{working_path}} will be used.
- * @param int|null $timeout Sets the process timeout (max. runtime). The timeout in seconds (default: 300 sec, `null` to disable).
  * @param int|null $idleTimeout Sets the process idle timeout (max. time since last output) in seconds.
+ * @param int|null $timeout Sets the process timeout (max. runtime). The timeout in seconds (default: 300 sec, `null` to disable).
  * @param string|null $secret Placeholder `%secret%` can be used in command. Placeholder will be replaced with this value and will not appear in any logs.
  * @param array|null $env Array of environment variables: `runLocally('echo $KEY', env: ['key' => 'value']);`
  * @param bool|null $forceOutput Print command output in real-time.
@@ -481,8 +481,8 @@ function run(
 function runLocally(
     string  $command,
     ?string $cwd = null,
-    ?int    $timeout = null,
     ?int    $idleTimeout = null,
+    ?int    $timeout = null,
     ?string $secret = null,
     ?array  $env = null,
     ?bool   $forceOutput = false,

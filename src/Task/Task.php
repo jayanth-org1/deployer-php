@@ -88,15 +88,13 @@ class Task
     {
         Context::push($context);
 
-        try {
-            call_user_func($this->callback); // call task
-        } finally {
-            if ($context->getConfig() !== null) {
-                $context->getConfig()->set('working_path', null);
-            }
-
-            Context::pop();
+        call_user_func($this->callback); // call task
+        
+        if ($context->getConfig() !== null) {
+            $context->getConfig()->set('working_path', null);
         }
+
+        Context::pop();
     }
 
     public function getName(): string
