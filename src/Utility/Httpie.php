@@ -158,7 +158,6 @@ class Httpie
             } else {
                 $error = curl_error($ch);
                 $errno = curl_errno($ch);
-                curl_close($ch);
                 throw new HttpieException($error, $errno);
             }
         }

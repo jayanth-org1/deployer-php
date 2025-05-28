@@ -182,7 +182,7 @@ class Deployer extends Container
         self::$instance = $this;
     }
 
-    public static function get(): self
+    public static function get(): mixed
     {
         return self::$instance;
     }

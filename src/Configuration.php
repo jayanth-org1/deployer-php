@@ -72,7 +72,7 @@ class Configuration implements \ArrayAccess
         }
     }
 
-    public function get(string $name, mixed $default = null): mixed
+    public function get(string $name, $default = null): string|null
     {
         if (array_key_exists($name, $this->values)) {
             if (is_closure($this->values[$name])) {

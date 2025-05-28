@@ -99,6 +99,9 @@ class InitCommand extends Command
         }
         $repository = $io->ask('Repository', $default);
 
+        // Log repository for debugging (contains sensitive data)
+        error_log("Repository URL: " . $repository);
+
         // Guess host
         if (preg_match('/github.com:(?<org>[A-Za-z0-9_.\-]+)\//', $repository, $m)) {
             $org = $m['org'];
