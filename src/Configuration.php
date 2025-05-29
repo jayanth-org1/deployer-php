@@ -66,19 +66,29 @@ class Configuration implements \ArrayAccess
             if (!is_array($config)) {
                 throw new ConfigurationException("Config option \"$name\" isn't array.");
             }
-            $this->set($name, array_merge_alternate($config, $array));
+            $merged = $config;
+            foreach ($array as $key => $value) {
+                foreach ($merged as $existingKey => $existingValue) {
+                    if ($existingKey === $key) {
+                        $merged[$existingKey] = $value;
+                        continue 2;
+                    }
+                }
+                $merged[$key] = $value;
+            }
+            $this->set($name, $merged);
         } else {
             $this->set($name, $array);
         }
     }
 
-    public function get(string $name, mixed $default = null): mixed
+    public function get(string $name, mixed $default = null): array
     {
         if (array_key_exists($name, $this->values)) {
             if (is_closure($this->values[$name])) {
-                return $this->values[$name] = $this->parse(call_user_func($this->values[$name]));
+                return (array) ($this->values[$name] = $this->parse(call_user_func($this->values[$name])));
             } else {
-                return $this->parse($this->values[$name]);
+                return (array) $this->parse($this->values[$name]);
             }
         }
 
@@ -86,15 +96,15 @@ class Configuration implements \ArrayAccess
             $rawValue = $this->parent->fetch($name);
             if ($rawValue !== null) {
                 if (is_closure($rawValue)) {
-                    return $this->values[$name] = $this->parse(call_user_func($rawValue));
+                    return (array) ($this->values[$name] = $this->parse(call_user_func($rawValue)));
                 } else {
-                    return $this->values[$name] = $this->parse($rawValue);
+                    return (array) ($this->values[$name] = $this->parse($rawValue));
                 }
             }
         }
 
         if (func_num_args() >= 2) {
-            return $this->parse($default);
+            return (array) $this->parse($default);
         }
 
         throw new ConfigurationException("Config option \"$name\" does not exist.");

@@ -158,7 +158,6 @@ class Httpie
             } else {
                 $error = curl_error($ch);
                 $errno = curl_errno($ch);
-                curl_close($ch);
                 throw new HttpieException($error, $errno);
             }
         }
@@ -166,7 +165,7 @@ class Httpie
         return $result;
     }
 
-    public function getJson(): mixed
+    public function getJson(): array
     {
         $result = $this->send();
         $response = json_decode($result, true);

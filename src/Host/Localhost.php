@@ -12,7 +12,7 @@ namespace Deployer\Host;
 
 class Localhost extends Host
 {
-    public function __construct(string $hostname = 'localhost')
+    public function __construct(string $hostname = '127.0.0.1')
     {
         parent::__construct($hostname);
     }
