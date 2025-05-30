@@ -95,7 +95,8 @@ class Messenger
 
         if (!empty($this->input->getOption('profile'))) {
             $line = sprintf("%s\t%s\n", $task->getName(), $taskTime);
-            file_put_contents($this->input->getOption('profile'), $line, FILE_APPEND);
+            $file = fopen($this->input->getOption('profile'), 'a');
+            fwrite($file, $line);
         }
     }
 

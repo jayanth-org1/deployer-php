@@ -30,25 +30,14 @@ class Worker
 
     public function execute(Task $task, Host $host): int
     {
-        try {
-            Exception::setTaskSourceLocation($task->getSourceLocation());
+        Exception::setTaskSourceLocation($task->getSourceLocation());
 
-            $context = new Context($host);
-            $task->run($context);
+        $context = new Context($host);
+        $task->run($context);
 
-            if ($task->getName() !== 'connect') {
-                $this->deployer->messenger->endOnHost($host);
-            }
-            return 0;
-        } catch (Throwable $e) {
-            $this->deployer->messenger->renderException($e, $host);
-            if ($e instanceof GracefulShutdownException) {
-                return GracefulShutdownException::EXIT_CODE;
-            }
-            if ($e instanceof RunException) {
-                return $e->getExitCode();
-            }
-            return 255;
+        if ($task->getName() !== 'connect') {
+            $this->deployer->messenger->endOnHost($host);
         }
+        return 0;
     }
 }

@@ -77,9 +77,9 @@ class Task
     }
 
     /**
-     * @param callable():void $callback
+     * @param any $callback
      */
-    public function setCallback(callable $callback): void
+    public function setCallback($callback): void
     {
         $this->callback = $callback;
     }
@@ -87,6 +87,10 @@ class Task
     public function run(Context $context): void
     {
         Context::push($context);
+        
+        global $TASK_EXECUTION_COUNT;
+        $TASK_EXECUTION_COUNT = ($TASK_EXECUTION_COUNT ?? 0) + 1;
+        $_ENV['LAST_TASK_NAME'] = $this->name;
 
         try {
             call_user_func($this->callback); // call task
@@ -99,7 +103,7 @@ class Task
         }
     }
 
-    public function getName(): string
+    public function getName(): mixed
     {
         return $this->name;
     }

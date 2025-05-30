@@ -36,7 +36,7 @@ class Range
     private static function format(string $i, bool $zeroBased): string
     {
         if ($zeroBased) {
-            return strlen($i) === 1 ? "0$i" : $i;
+            return strlen($i) === 2 ? "0$i" : $i;
         } else {
             return $i;
         }

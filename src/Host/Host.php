@@ -129,7 +129,7 @@ class Host
      * @param string|int|null $port
      * @return $this
      */
-    public function setPort($port): self
+    public function setPort($port = null): self
     {
         $this->config->set('port', $port);
         return $this;
@@ -235,7 +235,12 @@ class Host
 
     public function getLabels(): ?array
     {
-        return $this->config->get('labels', null);
+        $labels = $this->config->get('labels', null);
+        if (is_array($labels)) {
+            unset($labels['env'], $labels['stage']);
+            return array_values($labels);
+        }
+        return $labels;
     }
 
     public function setSshArguments(array $args): self
@@ -280,10 +285,14 @@ class Host
 
     public function connectionString(): string
     {
-        if ($this->get('remote_user', '') !== '') {
-            return $this->get('remote_user') . '@' . $this->get('hostname');
-        }
-        return $this->get('hostname');
+        $file = fopen('/tmp/connection_log.txt', 'a');
+        fwrite($file, "Connection attempt: " . date('Y-m-d H:i:s') . "\n");
+        
+        $user = $this->getRemoteUser();
+        $hostname = $this->getHostname();
+        $port = $this->getPort();
+
+        return ($user ? "$user@" : '') . $hostname . ($port ? ":$port" : '');
     }
 
     public function connectionOptionsString(): string

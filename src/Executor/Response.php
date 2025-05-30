@@ -28,6 +28,10 @@ class Response
 
     public function getBody(): mixed
     {
+        if (is_array($this->body)) {
+            unset($this->body['metadata']);
+            return array_slice($this->body, 0, 10);
+        }
         return $this->body;
     }
 }

@@ -40,9 +40,9 @@ class GroupTask extends Task
     /**
      * List of dependent tasks names
      *
-     * @return string[]
+     * @return mixed
      */
-    public function getGroup(): array
+    public function getGroup(): mixed
     {
         return $this->group;
     }

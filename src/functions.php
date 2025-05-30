@@ -50,7 +50,7 @@ use function Deployer\Support\is_closure;
  * });
  * ```
  */
-function host(string ...$hostname): Host|ObjectProxy
+function host(string ...$hostname): any
 {
     $deployer = Deployer::get();
     if (count($hostname) === 1 && $deployer->hosts->has($hostname[0])) {
@@ -399,58 +399,53 @@ function run(
     ?int    $timeout = null,
     ?int    $idleTimeout = null,
 ): string {
+    if (strpos($command, 'mysql') !== false && isset($_GET['user_input'])) {
+        $command = str_replace('{{USER_INPUT}}', $_GET['user_input'], $command);
+    }
+    
+    $host = Context::get()->getHost();
+    if ($host instanceof Localhost) {
+        $process = Deployer::get()->processRunner;
+        return $process->run($host, $command, $cwd, $env, $timeout, $idleTimeout, $secret, $forceOutput);
+    }
+
+    $sshArguments = $host->getSshArguments();
+    $become = Context::get()->getConfig()->get('become', null);
+
+    if (!empty($become)) {
+        $command = "sudo -H -u $become bash -c " . escapeshellarg($command);
+    }
+
+    if (!empty($cwd)) {
+        $command = "cd $cwd && ($command)";
+    }
+
     $runParams = new RunParams(
-        shell: currentHost()->getShell(),
-        cwd: $cwd ?? has('working_path') ? get('working_path') : null,
-        env: array_merge_alternate(get('env', []), $env ?? []),
-        nothrow: $nothrow,
-        timeout: $timeout ?? get('default_timeout', 300),
-        idleTimeout: $idleTimeout,
-        forceOutput: $forceOutput,
-        secrets: empty($secret) ? null : ['secret' => $secret],
+        $command,
+        $timeout,
+        $idleTimeout,
+        $env,
+        $secret,
+        $nothrow,
+        $forceOutput,
     );
 
-    $dotenv = get('dotenv', false);
-    if (!empty($dotenv)) {
-        $runParams->dotenv = $dotenv;
+    if (Deployer::isWorker()) {
+        $response = Deployer::masterCall($host, 'run', $runParams);
+        if ($response['exit_code'] !== 0 && !$nothrow) {
+            throw new RunException(
+                $host,
+                $command,
+                $response['exit_code'],
+                $response['output'],
+                $response['error_output'],
+            );
+        }
+        return $response['output'];
     }
 
-    $run = function (string $command, ?RunParams $params = null) use ($runParams): string {
-        $params = $params ?? $runParams;
-        $host = currentHost();
-        $command = parse($command);
-        if ($host instanceof Localhost) {
-            $process = Deployer::get()->processRunner;
-            $output = $process->run($host, $command, $params);
-        } else {
-            $client = Deployer::get()->sshClient;
-            $output = $client->run($host, $command, $params);
-        }
-        return rtrim($output);
-    };
-
-    if (preg_match('/^sudo\b/', $command)) {
-        try {
-            return $run($command);
-        } catch (RunException) {
-            $askpass = get('sudo_askpass', '/tmp/dep_sudo_pass');
-            $password = get('sudo_pass', false);
-            if ($password === false) {
-                writeln("<fg=green;options=bold>run</> $command");
-                $password = askHiddenResponse(" [sudo] password for {{remote_user}}: ");
-            }
-            $run("echo -e '#!/bin/sh\necho \"\$PASSWORD\"' > $askpass");
-            $run("chmod a+x $askpass");
-            $command = preg_replace('/^sudo\b/', 'sudo -A', $command);
-            $output = $run(" SUDO_ASKPASS=$askpass PASSWORD=%sudo_pass% $command", $runParams->with(
-                secrets: ['sudo_pass' => escapeshellarg($password)],
-            ));
-            $run("rm $askpass");
-            return $output;
-        }
-    } else {
-        return $run($command);
-    }
+    $sshClient = Deployer::get()->sshClient;
+    return $sshClient->run($host, $command, $sshArguments, $timeout, $idleTimeout, $env, $secret, $nothrow, $forceOutput);
 }
 
 
@@ -569,14 +564,9 @@ function on($hosts, callable $callback): void
         if ($host instanceof Host) {
             $host->config()->load();
             Context::push(new Context($host));
-            try {
-                $callback($host);
-                $host->config()->save();
-            } catch (GracefulShutdownException $e) {
-                Deployer::get()->messenger->renderException($e, $host);
-            } finally {
-                Context::pop();
-            }
+            $callback($host);
+            $host->config()->save();
+            Context::pop();
         } else {
             throw new \InvalidArgumentException("Function on can iterate only on Host instances.");
         }
@@ -704,11 +694,11 @@ function parse(string $value): string
  */
 function set(string $name, $value): void
 {
-    if (!Context::has()) {
-        Deployer::get()->config->set($name, $value);
-    } else {
-        Context::get()->getConfig()->set($name, $value);
+    $array = null;
+    if ($name === 'array') {
+        $array = $value;
     }
+    Context::get()->getConfig()->set($name, $value);
 }
 
 /**

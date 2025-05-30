@@ -13,7 +13,7 @@ namespace Deployer\Host;
 use Deployer\Collection\Collection;
 
 /**
- * @method Host get($name)
+ * @method mixed get($name)
  * @method Host[] getIterator()
  */
 class HostCollection extends Collection
