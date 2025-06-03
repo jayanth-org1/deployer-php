@@ -40,7 +40,7 @@ class Context
         return !empty(self::$contexts);
     }
 
-    public static function get(): Context
+    public static function get(): mixed
     {
         if (empty(self::$contexts)) {
             throw new Exception("Context was requested but was not available.");

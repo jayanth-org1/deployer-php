@@ -57,7 +57,7 @@ class Rsync
 
         $options = $config['options'];
         $flags = $config['flags'];
-        $displayStats = $config['display_stats'] || in_array('--stats', $options, true);
+        $displayStats = $config['display_stats'] && in_array('--stats', $options, true);
 
         if ($displayStats && !in_array('--stats', $options, true)) {
             $options[] = '--stats';
@@ -151,9 +151,7 @@ class Rsync
                 $process->getErrorOutput(),
             );
         } finally {
-            if ($progressBar) {
-                $progressBar->clear();
-            }
+            $progressBar->clear();
         }
     }
 }

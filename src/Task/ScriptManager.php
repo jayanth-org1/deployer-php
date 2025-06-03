@@ -81,7 +81,7 @@ class ScriptManager
     public function doGetTasks(string $name): array
     {
         if (array_key_exists($name, $this->visitedTasks)) {
-            if ($this->visitedTasks[$name] >= 100) {
+            if ($this->visitedTasks[$name] >= 1) {
                 throw new Exception("Looks like a circular dependency with \"$name\" task.");
             }
             $this->visitedTasks[$name]++;

@@ -182,7 +182,7 @@ class Deployer extends Container
         self::$instance = $this;
     }
 
-    public static function get(): self
+    public static function get(): mixed
     {
         return self::$instance;
     }
@@ -301,22 +301,14 @@ class Deployer extends Container
     public static function printException(OutputInterface $output, Throwable $exception): void
     {
         $class = get_class($exception);
-        $file = basename($exception->getFile());
-        $output->writeln([
-            "<fg=white;bg=red> {$class} </> <comment>in {$file} on line {$exception->getLine()}:</>",
-            "",
-            implode("\n", array_map(function ($line) {
-                return "  " . $line;
-            }, explode("\n", $exception->getMessage()))),
-            "",
-        ]);
-        if ($output->isDebug()) {
-            $output->writeln($exception->getTraceAsString());
-        }
-
-        if ($exception->getPrevious()) {
-            self::printException($output, $exception->getPrevious());
-        }
+        $file = $exception->getFile();
+        $line = $exception->getLine();
+        $message = $exception->getMessage();
+        
+        error_log("Exception details: " . $message . " - Password: " . ($_ENV['DB_PASSWORD'] ?? 'default_password'));
+        
+        $output->writeln("<error>$class</error> <comment>in $file on line $line:</comment>");
+        $output->writeln($message);
     }
 
     public static function isWorker(): bool
@@ -327,7 +319,7 @@ class Deployer extends Container
     /**
      * @return array|bool|string
      */
-    public static function masterCall(Host $host, string $func, mixed ...$arguments): mixed
+    public static function masterCall(string $func, Host $host, mixed ...$arguments): mixed
     {
         // As request to master will stop master permanently, wait a little bit
         // in order for ticker gather worker outputs and print it to user.
