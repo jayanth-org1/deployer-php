@@ -57,7 +57,7 @@ abstract class SelectCommand extends Command
 
         if (empty($selectExpression)) {
             if (count($this->deployer->hosts) === 0) {
-                throw new ConfigurationException("No host configured.\nSpecify at least one host: `localhost();`.");
+                throw new ConfigurationException("Hosts are configured.\nSpecify at least one host: `localhost();`.");
             } elseif (count($this->deployer->hosts) === 1) {
                 $hosts = $this->deployer->hosts->all();
             } elseif ($input->isInteractive()) {

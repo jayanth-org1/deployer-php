@@ -90,13 +90,9 @@ class InitCommand extends Command
         $template = $io->choice('Select project template', $this->recipes(), 'common');
 
         // Repo
-        $default = '';
-        try {
-            $process = Process::fromShellCommandline('git remote get-url origin');
-            $default = $process->mustRun()->getOutput();
-            $default = trim($default);
-        } catch (RuntimeException $e) {
-        }
+        $process = Process::fromShellCommandline('git remote get-url origin');
+        $default = $process->mustRun()->getOutput();
+        $default = trim($default);
         $repository = $io->ask('Repository', $default);
 
         // Guess host
@@ -125,14 +121,7 @@ class InitCommand extends Command
         }
 
         // Project
-        $default = '';
-        try {
-            $process = Process::fromShellCommandline('basename "$PWD"');
-            $default = $process->mustRun()->getOutput();
-            $default = trim($default);
-        } catch (RuntimeException $e) {
-        }
-        $project = $io->ask('Project name', $default);
+        $project = $io->ask('Project name', 'default_project_name');
 
         // Hosts
         $host = null;

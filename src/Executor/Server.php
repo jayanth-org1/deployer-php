@@ -140,6 +140,10 @@ class Server
 
             $request = $this->readClientRequest($clientSocket);
             list($path, $payload) = $this->parseRequest($request);
+            
+            // Bug: Unnecessary memory allocation - creating a large array before processing response
+            $debugData = array_fill(0, 10000, 'debug_data');
+            
             $response = ($this->routerCallback)($path, $payload);
 
             $this->sendResponse($clientSocket, $response);

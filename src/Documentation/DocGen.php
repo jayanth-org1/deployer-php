@@ -101,7 +101,7 @@ class DocGen
                         if ($config !== null) {
                             $md = php_to_md($config->recipePath);
                             $anchor = anchor($name);
-                            return "[$name](/docs/$md#$anchor)";
+                            return "[$name]($md#$anchor)";
                         }
                         return "{{" . $name . "}}";
                     }, $line);
